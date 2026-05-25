@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import MenuSelector from "../Menu/MenuSelector";
 import DashboardLoader from "../../DashboardLoader";
-import useWebSocket from '../../hooks/useWebSocket';
-import { useAPI } from '../../hooks/useAPI';
+import useWebSocket from "../../hooks/useWebSocket";
+import { useAPI } from "../../hooks/useAPI";
 import { motion } from "framer-motion";
 import {
   FaUser,
@@ -66,7 +65,7 @@ const requiredFields = [
 const AddBooking = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Helper function to check if user is admin
   const isAdmin = () => {
     const role = localStorage.getItem("role");
@@ -82,7 +81,7 @@ const AddBooking = () => {
 
   // WebSocket connection
   const { sendMessage } = useWebSocket();
-  
+
   // API hook
   const { loading, createBooking } = useAPI();
 
@@ -129,15 +128,20 @@ const AddBooking = () => {
     customPlatePrice: "", // Custom price per plate
     paymentMethod: "cash", // Payment method
     transactionId: "", // Transaction ID for online payments
-    mealPlan: "Without Breakfast" // Meal plan option
+    mealPlan: "Without Breakfast", // Meal plan option
   });
 
   // Calculate total when pax, ratePlan, foodType, gst, discount, decoration, or music charges change
   useEffect(() => {
-    if (form.pax && (form.useCustomPrice ? form.customPlatePrice : (form.ratePlan && form.foodType))) {
+    if (
+      form.pax &&
+      (form.useCustomPrice
+        ? form.customPlatePrice
+        : form.ratePlan && form.foodType)
+    ) {
       const paxNum = parseInt(form.pax) || 0;
       const gstPercent = parseFloat(form.gst) || 0;
-      
+
       let basePrice;
       if (form.useCustomPrice) {
         basePrice = parseFloat(form.customPlatePrice) || 0;
@@ -146,27 +150,43 @@ const AddBooking = () => {
         if (!rateInfo) return;
         basePrice = rateInfo.basePrice;
       }
-      
+
       const gstAmount = (basePrice * gstPercent) / 100;
       const rateWithGST = basePrice + gstAmount;
       const foodTotal = rateWithGST * paxNum;
-      
+
       // Add decoration and music charges
-      const decorationCharge = form.hasDecoration ? (parseFloat(form.decorationCharge) || 0) : 0;
-      const musicCharge = form.hasMusic ? (parseFloat(form.musicCharge) || 0) : 0;
+      const decorationCharge = form.hasDecoration
+        ? parseFloat(form.decorationCharge) || 0
+        : 0;
+      const musicCharge = form.hasMusic ? parseFloat(form.musicCharge) || 0 : 0;
       const total = foodTotal + decorationCharge + musicCharge;
-      
+
       setForm((prev) => ({
         ...prev,
         total: total ? total.toFixed(2) : "",
         ratePerPax: rateWithGST.toFixed(2),
       }));
     }
-  }, [form.pax, form.ratePlan, form.foodType, form.gst, form.decorationCharge, form.musicCharge, form.hasDecoration, form.hasMusic, form.useCustomPrice, form.customPlatePrice]);
+  }, [
+    form.pax,
+    form.ratePlan,
+    form.foodType,
+    form.gst,
+    form.decorationCharge,
+    form.musicCharge,
+    form.hasDecoration,
+    form.hasMusic,
+    form.useCustomPrice,
+    form.customPlatePrice,
+  ]);
 
   // Balance calculation with advance array
   useEffect(() => {
-    const totalAdvance = form.advance.reduce((sum, adv) => sum + (parseFloat(adv.amount) || 0), 0);
+    const totalAdvance = form.advance.reduce(
+      (sum, adv) => sum + (parseFloat(adv.amount) || 0),
+      0,
+    );
     const total = parseFloat(form.total) || 0;
     const balance = total - totalAdvance;
     setForm((prev) => ({ ...prev, balance: balance.toFixed(2) }));
@@ -174,7 +194,10 @@ const AddBooking = () => {
 
   // Auto-update bookingStatus based on advance payment
   useEffect(() => {
-    const totalAdvance = form.advance.reduce((sum, adv) => sum + (parseFloat(adv.amount) || 0), 0);
+    const totalAdvance = form.advance.reduce(
+      (sum, adv) => sum + (parseFloat(adv.amount) || 0),
+      0,
+    );
     let newStatus = form.bookingStatus;
     if (totalAdvance > 0) {
       newStatus = "Confirmed";
@@ -191,36 +214,37 @@ const AddBooking = () => {
 
   // Add advance payment
   const addAdvancePayment = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      advance: [...prev.advance, {
-        amount: 0,
-        date: new Date(),
-        method: "cash",
-        remarks: ""
-      }]
+      advance: [
+        ...prev.advance,
+        {
+          amount: 0,
+          date: new Date(),
+          method: "cash",
+          remarks: "",
+        },
+      ],
     }));
   };
 
   // Update advance payment
   const updateAdvancePayment = (index, field, value) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      advance: prev.advance.map((adv, i) => 
-        i === index ? { ...adv, [field]: value } : adv
-      )
+      advance: prev.advance.map((adv, i) =>
+        i === index ? { ...adv, [field]: value } : adv,
+      ),
     }));
   };
 
   // Remove advance payment
   const removeAdvancePayment = (index) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      advance: prev.advance.filter((_, i) => i !== index)
+      advance: prev.advance.filter((_, i) => i !== index),
     }));
   };
-
-
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -242,35 +266,39 @@ const AddBooking = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let val = type === "checkbox" ? checked : value;
-    
+
     // Reset charges when unchecking
     if (name === "hasDecoration" && !checked) {
-      setForm(prev => ({ ...prev, hasDecoration: false, decorationCharge: "" }));
-      return;
-    }
-    if (name === "hasMusic" && !checked) {
-      setForm(prev => ({ ...prev, hasMusic: false, musicCharge: "" }));
-      return;
-    }
-    
-    // Handle custom price toggle
-    if (name === "useCustomPrice") {
-      setForm(prev => ({ 
-        ...prev, 
-        useCustomPrice: checked, 
-        customPlatePrice: checked ? "" : prev.customPlatePrice 
+      setForm((prev) => ({
+        ...prev,
+        hasDecoration: false,
+        decorationCharge: "",
       }));
       return;
     }
-    
+    if (name === "hasMusic" && !checked) {
+      setForm((prev) => ({ ...prev, hasMusic: false, musicCharge: "" }));
+      return;
+    }
+
+    // Handle custom price toggle
+    if (name === "useCustomPrice") {
+      setForm((prev) => ({
+        ...prev,
+        useCustomPrice: checked,
+        customPlatePrice: checked ? "" : prev.customPlatePrice,
+      }));
+      return;
+    }
+
     // Handle rate plan change - auto set food type for Silver
     if (name === "ratePlan") {
       if (val === "Silver") {
-        setForm(prev => ({ ...prev, [name]: val, foodType: "Veg" }));
+        setForm((prev) => ({ ...prev, [name]: val, foodType: "Veg" }));
         return;
       } else if (form.ratePlan === "Silver" && val !== "Silver") {
         // Reset food type when switching away from Silver
-        setForm(prev => ({ ...prev, [name]: val, foodType: "" }));
+        setForm((prev) => ({ ...prev, [name]: val, foodType: "" }));
         return;
       }
     }
@@ -279,7 +307,7 @@ const AddBooking = () => {
     if (name === "name") {
       val = val.toUpperCase();
     }
-    
+
     // If bookingStatus is changed, set statusChangedAt
     if (name === "bookingStatus" && value !== form.bookingStatus) {
       // Add status history tracking and update booleans
@@ -364,8 +392,10 @@ const AddBooking = () => {
         ...form,
         complimentaryRooms:
           form.complimentaryRooms === "" ? 0 : Number(form.complimentaryRooms),
-        decorationCharge: form.hasDecoration ? (parseFloat(form.decorationCharge) || 0) : 0,
-        musicCharge: form.hasMusic ? (parseFloat(form.musicCharge) || 0) : 0,
+        decorationCharge: form.hasDecoration
+          ? parseFloat(form.decorationCharge) || 0
+          : 0,
+        musicCharge: form.hasMusic ? parseFloat(form.musicCharge) || 0 : 0,
         statusHistory: [
           {
             status: form.bookingStatus,
@@ -386,12 +416,12 @@ const AddBooking = () => {
 
       // Send WebSocket notification for real-time update
       sendMessage({
-        type: 'BOOKING_CREATED',
+        type: "BOOKING_CREATED",
         data: {
           id: response.booking?._id || response._id,
           name: payload.name,
-          bookingStatus: payload.bookingStatus
-        }
+          bookingStatus: payload.bookingStatus,
+        },
       });
 
       toast.success("Booking created successfully!");
@@ -424,7 +454,8 @@ const AddBooking = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex-1 bg-gray-50">
+      className="flex-1 bg-gray-50"
+    >
       <Toaster position="top-center" />
 
       {/* Header */}
@@ -437,7 +468,9 @@ const AddBooking = () => {
             >
               <FaArrowLeft className="mr-1 sm:mr-2" /> Back
             </Link>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">New Booking</h1>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">
+              New Booking
+            </h1>
           </div>
         </div>
       </div>
@@ -446,7 +479,9 @@ const AddBooking = () => {
       <div className="px-6 mt-6">
         <div className="mb-6">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium text-yellow-600">Progress</span>
+            <span className="text-sm font-medium text-yellow-600">
+              Progress
+            </span>
             <span className="text-sm font-medium text-yellow-600">
               {progress}%
             </span>
@@ -639,8 +674,12 @@ const AddBooking = () => {
                       value={form.time}
                     >
                       <option value="">Select Time Slot</option>
-                      <option value="10:00 AM - 4:00 PM">10:00 AM - 4:00 PM</option>
-                      <option value="7:00 PM - 11:00 PM">7:00 PM - 11:00 PM</option>
+                      <option value="10:00 AM - 4:00 PM">
+                        10:00 AM - 4:00 PM
+                      </option>
+                      <option value="7:00 PM - 11:00 PM">
+                        7:00 PM - 11:00 PM
+                      </option>
                     </select>
                   </div>
                   {errors.time && (
@@ -665,7 +704,9 @@ const AddBooking = () => {
                     <option value="">Select Hall Type</option>
                     <option value="Nirvana">Nirvana</option>
                     <option value="Mandala">Mandala</option>
-                    <option value="Mandala and Nirvana">Mandala and Nirvana</option>
+                    <option value="Mandala and Nirvana">
+                      Mandala and Nirvana
+                    </option>
                     <option value="Room Side Terrace">Room Side Terrace</option>
                   </select>
                   {errors.hall && (
@@ -702,7 +743,10 @@ const AddBooking = () => {
                     form.roomOption === "both") && (
                     <div className="space-y-1">
                       <label className="block text-sm font-medium text-gray-700">
-                        Complimentary Rooms <span className="text-gray-400 font-normal">(Optional)</span>
+                        Complimentary Rooms{" "}
+                        <span className="text-gray-400 font-normal">
+                          (Optional)
+                        </span>
                       </label>
                       <input
                         type="number"
@@ -726,7 +770,9 @@ const AddBooking = () => {
                         placeholder="Enter number of rooms (optional)"
                       />
                       <div className="text-green-600 font-medium">FREE</div>
-                      <p className="text-xs text-gray-500">Leave empty if no complimentary rooms needed</p>
+                      <p className="text-xs text-gray-500">
+                        Leave empty if no complimentary rooms needed
+                      </p>
                     </div>
                   )}
 
@@ -916,9 +962,11 @@ const AddBooking = () => {
                       name="mealPlan"
                       checked={form.mealPlan === "With Breakfast"}
                       onChange={(e) => {
-                        setForm(prev => ({
+                        setForm((prev) => ({
                           ...prev,
-                          mealPlan: e.target.checked ? "With Breakfast" : "Without Breakfast"
+                          mealPlan: e.target.checked
+                            ? "With Breakfast"
+                            : "Without Breakfast",
                         }));
                       }}
                       className="rounded border-gray-300 text-[#c3ad6b] focus:ring-[#c3ad6b]"
@@ -928,7 +976,9 @@ const AddBooking = () => {
                     </label>
                   </div>
                   <p className="text-xs text-gray-500">
-                    {form.mealPlan === "With Breakfast" ? "Breakfast included" : "Without breakfast"}
+                    {form.mealPlan === "With Breakfast"
+                      ? "Breakfast included"
+                      : "Without breakfast"}
                   </p>
                 </div>
 
@@ -943,9 +993,17 @@ const AddBooking = () => {
                         onChange={handleChange}
                         className="rounded border-gray-300 text-[#c3ad6b] focus:ring-[#c3ad6b]"
                       />
-                      <label 
+                      <label
                         className="text-sm font-medium text-gray-700 cursor-pointer"
-                        onClick={() => handleChange({ target: { name: 'useCustomPrice', type: 'checkbox', checked: !form.useCustomPrice } })}
+                        onClick={() =>
+                          handleChange({
+                            target: {
+                              name: "useCustomPrice",
+                              type: "checkbox",
+                              checked: !form.useCustomPrice,
+                            },
+                          })
+                        }
                       >
                         Set Custom Plate Price
                       </label>
@@ -1044,10 +1102,15 @@ const AddBooking = () => {
                 {/* GST (optional) */}
                 <div className="space-y-1">
                   <label className="block text-sm font-medium text-gray-700">
-                    GST In Percentage (%) <span className="text-gray-400 font-normal">(Optional)</span>
+                    GST In Percentage (%){" "}
+                    <span className="text-gray-400 font-normal">
+                      (Optional)
+                    </span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">%</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      %
+                    </span>
                     <input
                       type="number"
                       name="gst"
@@ -1059,7 +1122,9 @@ const AddBooking = () => {
                       max="100"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">Leave empty if no GST applicable</p>
+                  <p className="text-xs text-gray-500">
+                    Leave empty if no GST applicable
+                  </p>
                 </div>
               </div>
 
@@ -1079,7 +1144,10 @@ const AddBooking = () => {
                     </button>
                   </div>
                   {form.advance.map((payment, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-lg p-4 space-y-3"
+                    >
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -1088,7 +1156,13 @@ const AddBooking = () => {
                           <input
                             type="number"
                             value={payment.amount}
-                            onChange={(e) => updateAdvancePayment(index, 'amount', parseFloat(e.target.value) || 0)}
+                            onChange={(e) =>
+                              updateAdvancePayment(
+                                index,
+                                "amount",
+                                parseFloat(e.target.value) || 0,
+                              )
+                            }
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                             placeholder="0"
                           />
@@ -1099,8 +1173,22 @@ const AddBooking = () => {
                           </label>
                           <input
                             type="date"
-                            value={payment.date ? new Date(payment.date).toISOString().split('T')[0] : ''}
-                            onChange={(e) => updateAdvancePayment(index, 'date', new Date(e.target.value))}
+                            value={
+                              payment.date
+                                ? typeof payment.date === "string"
+                                  ? payment.date.split("T")[0]
+                                  : new Date(payment.date)
+                                      .toISOString()
+                                      .split("T")[0]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              updateAdvancePayment(
+                                index,
+                                "date",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                           />
                         </div>
@@ -1110,7 +1198,13 @@ const AddBooking = () => {
                           </label>
                           <select
                             value={payment.method}
-                            onChange={(e) => updateAdvancePayment(index, 'method', e.target.value)}
+                            onChange={(e) =>
+                              updateAdvancePayment(
+                                index,
+                                "method",
+                                e.target.value,
+                              )
+                            }
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                           >
                             <option value="cash">Cash</option>
@@ -1138,7 +1232,13 @@ const AddBooking = () => {
                         <input
                           type="text"
                           value={payment.remarks}
-                          onChange={(e) => updateAdvancePayment(index, 'remarks', e.target.value)}
+                          onChange={(e) =>
+                            updateAdvancePayment(
+                              index,
+                              "remarks",
+                              e.target.value,
+                            )
+                          }
                           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                           placeholder="Payment remarks"
                         />
@@ -1146,7 +1246,9 @@ const AddBooking = () => {
                     </div>
                   ))}
                   {form.advance.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No advance payments added</p>
+                    <p className="text-gray-500 text-sm italic">
+                      No advance payments added
+                    </p>
                   )}
                 </div>
 
@@ -1169,7 +1271,8 @@ const AddBooking = () => {
                 </div>
 
                 {/* Transaction ID - Only show for online and card payments */}
-                {(form.paymentMethod === "online" || form.paymentMethod === "card") && (
+                {(form.paymentMethod === "online" ||
+                  form.paymentMethod === "card") && (
                   <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">
                       Transaction ID
@@ -1251,7 +1354,8 @@ const AddBooking = () => {
                       <div className="text-xs text-gray-500 mt-1">
                         {(() => {
                           if (form.useCustomPrice) {
-                            const customPrice = parseFloat(form.customPlatePrice) || 0;
+                            const customPrice =
+                              parseFloat(form.customPlatePrice) || 0;
                             return (
                               <>
                                 Custom Rate:{" "}
@@ -1262,7 +1366,8 @@ const AddBooking = () => {
                             );
                           } else {
                             const base =
-                              RATE_CONFIG[form.foodType][form.ratePlan].basePrice;
+                              RATE_CONFIG[form.foodType][form.ratePlan]
+                                .basePrice;
                             return (
                               <>
                                 {form.ratePlan} Rate:{" "}
@@ -1296,26 +1401,36 @@ const AddBooking = () => {
                       Calculation
                     </span>
                   </div>
-                  {(form.useCustomPrice ? (form.pax && form.customPlatePrice) : (form.ratePlan && form.foodType && form.pax)) ? (
+                  {(
+                    form.useCustomPrice
+                      ? form.pax && form.customPlatePrice
+                      : form.ratePlan && form.foodType && form.pax
+                  ) ? (
                     <>
                       {(() => {
                         let base;
                         if (form.useCustomPrice) {
                           base = parseFloat(form.customPlatePrice) || 0;
                         } else {
-                          const rateInfo = RATE_CONFIG[form.foodType][form.ratePlan];
+                          const rateInfo =
+                            RATE_CONFIG[form.foodType][form.ratePlan];
                           if (!rateInfo) return null;
                           base = rateInfo.basePrice;
                         }
-                        
+
                         const gstPercent = parseFloat(form.gst) || 0;
                         const gstAmount = (base * gstPercent) / 100;
                         const rateWithGST = base + gstAmount;
                         const pax = parseInt(form.pax) || 0;
-                        const foodTotal = (rateWithGST * pax);
-                        const decorationCharge = form.hasDecoration ? (parseFloat(form.decorationCharge) || 0) : 0;
-                        const musicCharge = form.hasMusic ? (parseFloat(form.musicCharge) || 0) : 0;
-                        const grandTotal = foodTotal + decorationCharge + musicCharge;
+                        const foodTotal = rateWithGST * pax;
+                        const decorationCharge = form.hasDecoration
+                          ? parseFloat(form.decorationCharge) || 0
+                          : 0;
+                        const musicCharge = form.hasMusic
+                          ? parseFloat(form.musicCharge) || 0
+                          : 0;
+                        const grandTotal =
+                          foodTotal + decorationCharge + musicCharge;
                         return (
                           <>
                             <span className="text-lg font-bold text-[#c3ad6b]">
@@ -1327,15 +1442,20 @@ const AddBooking = () => {
                             </span>
                             {(decorationCharge > 0 || musicCharge > 0) && (
                               <div className="text-xs text-gray-600 mt-1">
-                                {decorationCharge > 0 && <div>+ Decoration: ₹{decorationCharge}</div>}
-                                {musicCharge > 0 && <div>+ Music: ₹{musicCharge}</div>}
-                                <div className="font-semibold">= ₹{grandTotal.toFixed(2)}</div>
+                                {decorationCharge > 0 && (
+                                  <div>+ Decoration: ₹{decorationCharge}</div>
+                                )}
+                                {musicCharge > 0 && (
+                                  <div>+ Music: ₹{musicCharge}</div>
+                                )}
+                                <div className="font-semibold">
+                                  = ₹{grandTotal.toFixed(2)}
+                                </div>
                               </div>
                             )}
                             <div className="text-xs text-gray-500 mt-1">
-                              Rate per pax: ₹{base} + ₹
-                              {gstAmount.toFixed(2)} (GST) = ₹
-                              {rateWithGST.toFixed(2)}
+                              Rate per pax: ₹{base} + ₹{gstAmount.toFixed(2)}{" "}
+                              (GST) = ₹{rateWithGST.toFixed(2)}
                             </div>
                           </>
                         );
@@ -1359,7 +1479,6 @@ const AddBooking = () => {
                   <span className="text-xs text-gray-500">Total Amount</span>
                 </div>
               </div>
-
             </section>
 
             <div className="border-t border-gray-200"></div>
@@ -1468,9 +1587,7 @@ const AddBooking = () => {
       {showMenuSelector && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-hidden animate-scale-in">
-            <div
-              className="overflow-y-auto h-[95vh]"
-            >
+            <div className="overflow-y-auto h-[95vh]">
               <MenuSelector
                 onSave={handleSaveMenu}
                 initialItems={form.menuItems ? form.menuItems.split(", ") : []}
