@@ -11,6 +11,8 @@ import {
   FiFileText,
   FiTrash2,
   FiMenu,
+  FiXCircle,
+  FiRotateCcw,
 } from "react-icons/fi";
 import { FaWhatsapp, FaList } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +33,7 @@ const debounce = (func, delay) => {
 const statusStyle = (status) => {
   if (status === "Confirmed") return "bg-green-100 text-green-800";
   if (status === "Tentative") return "bg-yellow-100 text-yellow-800";
+  if (status === "Cancelled") return "bg-red-100 text-red-800";
   return "bg-gray-100 text-gray-700";
 };
 
@@ -175,6 +178,38 @@ const ListBooking = ({ setSidebarOpen }) => {
   const cancelDelete = () => {
     setDeleteModalOpen(false);
     setProductToDelete(null);
+  };
+
+  // Cancel a booking, or restore a cancelled one back to Confirmed/Tentative
+  const handleCancelToggle = (item) => {
+    const isCancelled = item.bookingStatus === "Cancelled";
+    const totalAdvance = Array.isArray(item.advance)
+      ? item.advance.reduce((sum, p) => sum + (p.amount || 0), 0)
+      : Number(item.advance) || 0;
+    const newStatus = isCancelled
+      ? totalAdvance > 0
+        ? "Confirmed"
+        : "Tentative"
+      : "Cancelled";
+    const question = isCancelled
+      ? `Restore ${item.name}'s booking as ${newStatus}?`
+      : `Cancel ${item.name}'s booking?`;
+    if (!window.confirm(question)) return;
+    bookingAPI
+      .update(item._id, {
+        bookingStatus: newStatus,
+        statusHistory: [
+          { status: newStatus, changedAt: new Date().toISOString() },
+        ],
+      })
+      .then(() => {
+        fetchAllData();
+        if (searchQuery.trim()) handleSearch();
+        else fetchUsers();
+      })
+      .catch((err) =>
+        alert(err.response?.data?.message || "Failed to update booking"),
+      );
   };
 
   const handleSearch = async () => {
@@ -550,6 +585,20 @@ const ListBooking = ({ setSidebarOpen }) => {
                             <FaWhatsapp size={11} /> WA
                           </button>
                           <button
+                            onClick={() => handleCancelToggle(item)}
+                            className="flex-1 min-w-[70px] inline-flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            {item.bookingStatus === "Cancelled" ? (
+                              <>
+                                <FiRotateCcw size={11} /> Restore
+                              </>
+                            ) : (
+                              <>
+                                <FiXCircle size={11} /> Cancel
+                              </>
+                            )}
+                          </button>
+                          <button
                             onClick={() => handleDeleteModal(item)}
                             className="flex-1 min-w-[50px] inline-flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                           >
@@ -679,6 +728,20 @@ const ListBooking = ({ setSidebarOpen }) => {
                                   className="inline-flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-lg text-xs font-semibold transition-colors"
                                 >
                                   <FaWhatsapp size={11} />
+                                </button>
+                                <button
+                                  onClick={() => handleCancelToggle(item)}
+                                  className="inline-flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded-lg text-xs font-semibold transition-colors"
+                                >
+                                  {item.bookingStatus === "Cancelled" ? (
+                                    <>
+                                      <FiRotateCcw size={11} /> Restore
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FiXCircle size={11} /> Cancel
+                                    </>
+                                  )}
                                 </button>
                                 <button
                                   onClick={() => handleDeleteModal(item)}

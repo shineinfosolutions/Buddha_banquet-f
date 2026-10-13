@@ -388,6 +388,8 @@ function LaganCalendar({ setSidebarOpen }) {
       
       const grouped = {};
       bookingsArray.forEach((booking) => {
+        // Cancelled bookings free up the date
+        if (booking.bookingStatus === 'Cancelled') return;
         const dateKey = (booking.eventDate || booking.startDate)?.split('T')[0];
         if (dateKey) {
           if (!grouped[dateKey]) grouped[dateKey] = [];

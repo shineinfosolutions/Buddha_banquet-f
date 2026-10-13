@@ -82,8 +82,10 @@ function Calendar({ setSidebarOpen }) {
           (booking.number && booking.number.includes(searchTerm)) ||
           (booking.contact && booking.contact.includes(searchTerm))
         
-        const matchesStatus = statusFilter === 'All' || 
-          (booking.bookingStatus && booking.bookingStatus === statusFilter)
+        // Cancelled bookings free up the date, so "All" leaves them out
+        const matchesStatus = statusFilter === 'All'
+          ? booking.bookingStatus !== 'Cancelled'
+          : booking.bookingStatus === statusFilter
         
         return matchesSearch && matchesStatus
       })
@@ -408,6 +410,7 @@ function Calendar({ setSidebarOpen }) {
                 <option value="Confirmed">Confirmed</option>
                 <option value="Tentative">Tentative</option>
                 <option value="Enquiry">Enquiry</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
               {(searchTerm || statusFilter !== 'All') && (
                 <button onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}

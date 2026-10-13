@@ -39,11 +39,11 @@ const RATE_CONFIG = {
   },
   "Non-Veg": {
     Silver: {
-      basePrice: 1050,
+      basePrice: 1599,
       taxPercent: 18,
     },
     Gold: {
-      basePrice: 1250,
+      basePrice: 1899,
       taxPercent: 18,
     },
     Platinum: {
@@ -289,18 +289,6 @@ const AddBooking = () => {
         customPlatePrice: checked ? "" : prev.customPlatePrice,
       }));
       return;
-    }
-
-    // Handle rate plan change - auto set food type for Silver
-    if (name === "ratePlan") {
-      if (val === "Silver") {
-        setForm((prev) => ({ ...prev, [name]: val, foodType: "Veg" }));
-        return;
-      } else if (form.ratePlan === "Silver" && val !== "Silver") {
-        // Reset food type when switching away from Silver
-        setForm((prev) => ({ ...prev, [name]: val, foodType: "" }));
-        return;
-      }
     }
 
     // Capitalize name field - make all letters uppercase
@@ -894,7 +882,7 @@ const AddBooking = () => {
                     <option value="">Select Rate Plan</option>
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>
-                    {/* <option value="Platinum">Platinum</option> */}
+                    <option value="Platinum">Platinum</option>
                   </select>
                   {errors.ratePlan && (
                     <p className="text-red-500 text-xs mt-1">
@@ -919,9 +907,7 @@ const AddBooking = () => {
                   >
                     <option value="">Select Food Type</option>
                     <option value="Veg">Veg</option>
-                    {form.ratePlan !== "Silver" && (
-                      <option value="Non-Veg">Non-Veg</option>
-                    )}
+                    <option value="Non-Veg">Non-Veg</option>
                   </select>
                   {errors.foodType && (
                     <p className="text-red-500 text-xs mt-1">
@@ -951,6 +937,9 @@ const AddBooking = () => {
                     <option value="Corporate meeting">Corporate meeting</option>
                     <option value="Haldi function">Haldi function</option>
                     <option value="Farewell">Farewell</option>
+                    <option value="Normal Lunch">Normal Lunch</option>
+                    <option value="Normal Dinner">Normal Dinner</option>
+                    <option value="Hi-Tea">Hi-Tea</option>
                   </select>
                 </div>
 

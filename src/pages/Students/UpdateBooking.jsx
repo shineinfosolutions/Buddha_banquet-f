@@ -176,6 +176,11 @@ const UpdateBooking = () => {
     );
     const total = parseFloat(booking.total) || 0;
     const balance = total - totalAdvance;
+    // Cancelled bookings keep their status until restored from the booking list
+    if (booking.bookingStatus === "Cancelled") {
+      setBooking((prev) => ({ ...prev, balance: balance.toFixed(2) }));
+      return;
+    }
     let newStatus = booking.bookingStatus;
     let statusBool = booking.status;
     if (totalAdvance > 0) {
@@ -451,7 +456,11 @@ const UpdateBooking = () => {
       let isEnquiry = prev.isEnquiry || false;
       let isTentative = prev.isTentative || false;
       // Status changes are now handled by useEffect based on advance array
-      if (name !== "advance" && prev.bookingStatus !== "Confirmed") {
+      if (
+        name !== "advance" &&
+        prev.bookingStatus !== "Confirmed" &&
+        prev.bookingStatus !== "Cancelled"
+      ) {
         // On any other edit, set Tentative if not already
         newStatus = "Tentative";
         isConfirmed = prev.isConfirmed;
