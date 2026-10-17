@@ -36,6 +36,18 @@ const RATE_CONFIG = {
       basePrice: 1899,
       taxPercent: 18,
     },
+    "Normal Lunch": {
+      basePrice: 800,
+      taxPercent: 18,
+    },
+    "Normal Dinner": {
+      basePrice: 800,
+      taxPercent: 18,
+    },
+    "Hi-Tea": {
+      basePrice: 800,
+      taxPercent: 18,
+    },
   },
   "Non-Veg": {
     Silver: {
@@ -48,6 +60,18 @@ const RATE_CONFIG = {
     },
     Platinum: {
       basePrice: 2299,
+      taxPercent: 18,
+    },
+    "Normal Lunch": {
+      basePrice: 800,
+      taxPercent: 18,
+    },
+    "Normal Dinner": {
+      basePrice: 800,
+      taxPercent: 18,
+    },
+    "Hi-Tea": {
+      basePrice: 800,
       taxPercent: 18,
     },
   },
@@ -883,6 +907,9 @@ const AddBooking = () => {
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>
                     <option value="Platinum">Platinum</option>
+                    <option value="Normal Lunch">Normal Lunch</option>
+                    <option value="Normal Dinner">Normal Dinner</option>
+                    <option value="Hi-Tea">Hi-Tea</option>
                   </select>
                   {errors.ratePlan && (
                     <p className="text-red-500 text-xs mt-1">
@@ -937,9 +964,6 @@ const AddBooking = () => {
                     <option value="Corporate meeting">Corporate meeting</option>
                     <option value="Haldi function">Haldi function</option>
                     <option value="Farewell">Farewell</option>
-                    <option value="Normal Lunch">Normal Lunch</option>
-                    <option value="Normal Dinner">Normal Dinner</option>
-                    <option value="Hi-Tea">Hi-Tea</option>
                   </select>
                 </div>
 

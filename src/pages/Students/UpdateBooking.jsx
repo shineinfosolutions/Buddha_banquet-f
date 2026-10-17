@@ -97,6 +97,18 @@ const UpdateBooking = () => {
         basePrice: 1899,
         taxPercent: 18,
       },
+      "Normal Lunch": {
+        basePrice: 800,
+        taxPercent: 18,
+      },
+      "Normal Dinner": {
+        basePrice: 800,
+        taxPercent: 18,
+      },
+      "Hi-Tea": {
+        basePrice: 800,
+        taxPercent: 18,
+      },
     },
     "Non-Veg": {
       Silver: {
@@ -109,6 +121,18 @@ const UpdateBooking = () => {
       },
       Platinum: {
         basePrice: 2299,
+        taxPercent: 18,
+      },
+      "Normal Lunch": {
+        basePrice: 800,
+        taxPercent: 18,
+      },
+      "Normal Dinner": {
+        basePrice: 800,
+        taxPercent: 18,
+      },
+      "Hi-Tea": {
+        basePrice: 800,
         taxPercent: 18,
       },
     },
@@ -947,6 +971,9 @@ const UpdateBooking = () => {
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>
                     <option value="Platinum">Platinum</option>
+                    <option value="Normal Lunch">Normal Lunch</option>
+                    <option value="Normal Dinner">Normal Dinner</option>
+                    <option value="Hi-Tea">Hi-Tea</option>
                   </select>
                 </div>
 

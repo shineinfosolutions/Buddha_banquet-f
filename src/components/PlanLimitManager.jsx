@@ -95,6 +95,9 @@ const PlanEditor = ({ plan, onSave, onCancel, onDelete, onCategoriesUpdate }) =>
                 <option value="Silver">Silver</option>
                 <option value="Gold">Gold</option>
                 <option value="Platinum">Platinum</option>
+                <option value="Normal Lunch">Normal Lunch</option>
+                <option value="Normal Dinner">Normal Dinner</option>
+                <option value="Hi-Tea">Hi-Tea</option>
               </select>
             </div>
             <div>

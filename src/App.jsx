@@ -13,6 +13,7 @@ import AddBooking from './pages/Students/AddBooking'
 import UpdateBooking from './pages/Students/UpdateBooking'
 import MenuView from './pages/Students/MenuView'
 import Invoice from './pages/Students/Invoice'
+import SharedInvoice from './pages/Students/SharedInvoice'
 import LaganCalendar from './pages/Calendar/LaganCalendar'
 import Calendar from './pages/Calendar/Calendar'
 import MenuPlanManager from './components/MenuPlanManager'
@@ -37,7 +38,10 @@ function App() {
 
   return (
     <Router>
-      {isLoggedIn ? (
+      <Routes>
+        {/* Public invoice link shared with customers on WhatsApp — works without login */}
+        <Route path="/share/invoice/:id" element={<SharedInvoice />} />
+        <Route path="/*" element={isLoggedIn ? (
         <div className="flex min-h-screen bg-gray-100 w-full overflow-x-hidden">
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="flex-1 lg:ml-64 xl:ml-72 2xl:ml-80 transition-all duration-300 min-w-0 w-full overflow-x-hidden">
@@ -64,11 +68,10 @@ function App() {
         </div>
       ) : (
         <div className="min-h-screen w-full">
-          <Routes>
-            <Route path="/*" element={<Login />} />
-          </Routes>
+          <Login />
         </div>
-      )}
+      )} />
+      </Routes>
     </Router>
   )
 }
